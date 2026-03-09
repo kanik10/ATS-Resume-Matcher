@@ -2,20 +2,29 @@ from flask import *
 from PyPDF2 import PdfReader
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import spacy
+import re
 
-nlp = spacy.load("en_core_web_sm")
+STOPWORDS = {
+    "i","me","my","myself","we","our","ours","ourselves","you","your","yours",
+    "yourself","yourselves","he","him","his","himself","she","her","hers",
+    "herself","it","its","itself","they","them","their","theirs","themselves",
+    "what","which","who","whom","this","that","these","those","am","is","are",
+    "was","were","be","been","being","have","has","had","having","do","does",
+    "did","doing","a","an","the","and","but","if","or","because","as","until",
+    "while","of","at","by","for","with","about","against","between","into",
+    "through","during","before","after","above","below","to","from","up","down",
+    "in","out","on","off","over","under","again","further","then","once","here",
+    "there","when","where","why","how","all","both","each","few","more","most",
+    "other","some","such","no","nor","not","only","own","same","so","than","too",
+    "very","can","will","just","should","now","would","could","also"
+}
 
 def clean_function(text):
     text = text.lower()
-    text = nlp(text)
-    text = [t for t in text]
-    text = [t for t in text if not t.is_stop]
-    text = [t for t in text if not t.is_punct]
-    text = [t.lemma_ for t in text]
-    text = [str(t) for t in text]
-    text = " ".join(text)
-    return text
+    text = re.sub(r'[^a-z\s]', ' ', text)
+    tokens = text.split()
+    tokens = [t for t in tokens if t not in STOPWORDS and len(t) > 1]
+    return " ".join(tokens)
 
 app = Flask(__name__)
 
